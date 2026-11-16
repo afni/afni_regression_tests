@@ -113,8 +113,12 @@ endif
 #
 # if failure, set $rv and goto EXIT
 
+set CHANGEout = CHANGE.out.run.txt
 echo "CHANGE : run commands to test (this is the point of script)"
-echo "I like cheese" > CHANGE.out.run.txt
+echo "I like cheese" > $CHANGEout
+
+set dout = tiny_image.nii
+nifti_tool -make_im -prefix $dout
 set rv = $status
 
 if ( $rv ) then
@@ -132,21 +136,20 @@ endif
 set rv = 0
 
 # ----- perform local test(s) : START CHANGE -----
-if ( ! -f CHANGE.out.run.txt ) then
+if ( ! -f $CHANGEout ) then
    echo "== stat: FAIL: $label : missing output"
    set rv = 1
    goto EXIT
 endif
 
 # CHANGE : perform any extra local tests
-set nvox = `cat CHANGE.out.run.txt | wc -w`
-if ( $nvox != 3 ) then
-   echo "== stat: FAIL: $label : count $nvox != 3"
+set nvox = `3dinfo -nijk $dout`
+if ( $nvox != 1 ) then
+   echo "== stat: FAIL: $label : count $nvox != 1"
    set rv = 1
    goto EXIT
 endif
-set CHANGEout = CHANGE.dout_$label.nvox.txt
-echo $nvox > $CHANGEout
+
 # ----- end local test(s) : END CHANGE -----
 
 # -------------
@@ -157,7 +160,7 @@ echo "== stat: SUCCESS: $label"
 # ----------------------------------------------------------------------
 # regression tests (file test ...) stored in regress file
 
-echo CHANGE.output.nii 0.001 afni_exact >! $file_reg
+echo $dout 0.001 3dDiff >> $file_reg
 echo $CHANGEout 0 diff >> $file_reg
 
 # ----------------------------------------------------------------------
