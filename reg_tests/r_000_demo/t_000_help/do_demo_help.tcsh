@@ -5,16 +5,14 @@
 #
 #     - run a test based on standard data
 #     - input is generally elsewhere, output is HERE
-#     - evalute the local (non-regression) success of the command(s)
+#     - evaluate the local (non-regression) success of the command(s)
 #       - likely with extra checks on any output files
 #     - create status.txt  : store the above status, also use for exit value
 #     - create regress.txt : store desired regression tests, to be run later
 #
 # ===========================================================================
-# inputs: none required
-#   - (optional) droot: root data dir
-#     - else use any $AFNI_REGTEST_DROOT, else data is HERE
-#     - root data dir: typically above AFNI_data6 or AFNI_data7
+# inputs:
+#   - droot: root data dir - perhaps above AFNI_data6 or AFNI_data7
 #
 # outputs:
 #   - status.txt  : contains 0 (success) or other (fail == 1 is sufficient)
@@ -26,63 +24,57 @@
 # ===========================================================================
 
 # ----------------------------------------------------------------------
-# format of a test script:
+# to create a new test script (starting from this one):
 #
-# - run one test (script) per test directory
-# - possibly edit any CHANGE lines or regions
-#   - set $index and $label - optional, main tests will not use these
-#   - set $dlocal = top path to data (e.g. AFNI_data7/task_demo_ap/sub-000/)
-#   - write some "process" commands and store $status in $rv
-#     - this is the main command or commands to test
-#   - write some tests to evaluate basic "success" of the "process" commands
-#     - if success: set $rv=0, write regression tests to $file_reg
-#     - if failure: set $rv=1, goto EXIT
-#   - write final $rv ($status) to status.txt and eventually return $rv
+#   possibly edit the following CHANGE lines or regions:
+#
+#     1. set $dlocal = top path to data (e.g. AFNI_data7/task_demo_ap/sub-000/)
+#        - this should end in a '/' (if not blank)
+#     2. write some "process" commands and store $status in $rv
+#        - the main command(s) to test
+#     3. write some additional tests to evaluate the "process" commands
+#        - set rv=0 if successful (else set rv=1 and "goto EXIT")
+#     4. write regression tests to $file_reg
 #
 # ----------------------------------------------------------------------
 # format of $file_reg = regress.txt - the regression tests file
-#   - 3 columns : filename tolerance test
+#
+#   3 columns per test : filename tolerance test
+#
 #     filename  : name of file to compare for regression test
-#          e.g. : value.txt, motion.1D, data.nii, dset+tlrc.HEAD
+#          e.g. : value.txt, motion.1D, data.nii, dset+tlrc
 #     tolerance : if 3dDiff, tolerance to apply (else any token)
 #          e.g. : 0, 0.01
-#     test      : one of:
-#        diff     : run diff or cmp to detect text differences
-#        3dDiff   : run 3dDiff with any non-zero tolerance
+#     test      : one of diff, 3dDiff
+#        diff   : run diff or cmp to detect text differences
+#        3dDiff : run 3dDiff with any non-zero tolerance
 #
 # ----------------------------------------------------------------------
 # minor notes:
 #   - a naming order is not required, it might be easier to move tests
 #     around, such as having one script in multiple locations
+#   - tests will probably have one script per directory
 #
 # ----------------------------------------------------------------------
-
-
-# ----------------------------------------------------------------------
-# variables: 
-#   required to apply later:
-#     $dfull      : full path prefix to input files below
-#                   combining input $droot and local $dlocal, else ""
-#     $rv         : final return value (used as "exit $rv")
+# variables (required by the testing script):
+#
+#     $dfull      : full path prefix to (any remote) input files below
+#                   combining input $droot and $dlocal, else ""
 #     $file_stat  : file to write final $rv/$status to
 #                   (must be status.txt)
 #     $file_reg   : file to write final regression tests to
 #                   (must be regress.txt)
+#     $rv         : final return value (used as "exit $rv")
 #
-#   optional (likely not used for main AFNI regression tests)
-#     $label      : a label possibly used in file names
-#                 : might be based on some $index
+# ----------------------------------------------------------------------
 
-# ------------------------------
+# ----------------------------------------------------------------------
 # set at least 4 required variables: dfull, file_stat, file_reg, rv
 
-# CHANGE these vars
-# (optional) index/label vars, for scripts that choose to use them
-set index  = 01
-set label  = ${index}_CHANGE
-# local data root (e.g. "" or "AFNI_data7/task_demo_ap/sub-000/")
+# CHANGE: local data root (e.g. "" or "AFNI_data7/task_demo_ap/sub-000/")
 set dlocal = "AFNI_data6/afni/"
 
+# ===== start KEEP: do not alter ============================================
 # note final files and initialize them, init return value
 set file_stat = status.txt
 set file_reg  = regress.txt
@@ -90,14 +82,8 @@ set rv        = 9    # return value or $status (9 means nothing saved)
 echo -n $rv   >! $file_stat
 echo -n ""    >! $file_reg
 
-# set droot to an input root, env var or nothing (meaning inputs are HERE)
-set droot = ''
-echo nargs = $#argv
-if ( $#argv > 0 ) then
-    set droot = $1
-else if ( $?AFNI_REGTEST_DROOT ) then
-    set droot = $AFNI_REGTEST_DROOT
-endif
+# set droot to required input data root
+set droot = $1
 
 # set needed dfull: if $droot is known, combine with $dlocal
 if ( "$droot" != "" ) then
@@ -105,21 +91,25 @@ if ( "$droot" != "" ) then
 else
     set dfull = ''
 endif
+# ===== end KEEP ============================================================
 
 # ----------------------------------------------------------------------
 # process - run the main command(s) and set the return value, rv
 #
-# assumes: $dfull, $label (optional per script)
+# assumes: $dfull
+# result : set $rv
 #
-# if failure, set $rv and goto EXIT
+# if failure, goto EXIT
 
-set CHANGEout = CHANGE.out.run.txt
-echo "CHANGE : run commands to test (this is the point of script)"
-echo "I like cheese" > $CHANGEout
+# ===== START CHANGE : run main commands to test =====
+# e.g. create 2 output files and check the status of nifti_tool
+set myoutput = out.process.txt
+echo "I like cheese" > $myoutput
 
 set dout = tiny_image.nii
 nifti_tool -make_im -prefix $dout
 set rv = $status
+# ===== END CHANGE =====
 
 if ( $rv ) then
    goto EXIT
@@ -128,43 +118,42 @@ endif
 # ----------------------------------------------------------------------
 # basic tests from above process - run any basis tests (non-regression)
 #
-# assumes: probably nothing
+# assumes: probably nothing (might have filename variables)
 #
 # if failure, set $rv and goto EXIT
 # 
 
 set rv = 0
 
-# ----- perform local test(s) : START CHANGE -----
-if ( ! -f $CHANGEout ) then
-   echo "== stat: FAIL: $label : missing output"
+# ===== START CHANGE : perform local test(s) =====
+if ( ! -f $myoutput ) then
+   echo "== stat: FAIL: missing output"
    set rv = 1
    goto EXIT
 endif
 
-# CHANGE : perform any extra local tests
+# some dataset test...
 set nvox = `3dinfo -nijk $dout`
 if ( $nvox != 1 ) then
-   echo "== stat: FAIL: $label : count $nvox != 1"
+   echo "== stat: FAIL: count $nvox != 1"
    set rv = 1
    goto EXIT
 endif
+# ===== END CHANGE =====
 
-# ----- end local test(s) : END CHANGE -----
-
-# -------------
-# do not change - if we are here, the basic tests succeeded
+# ===============================================
+# KEEP: if we are here, the basic tests succeeded
 set rv = 0
-echo "== stat: SUCCESS: $label"
+echo "== stat: SUCCESS"
 
-# ----------------------------------------------------------------------
-# regression tests (file test ...) stored in regress file
+# ======================================================================
+# CHANGE: regression tests (file test ...) stored in regress file
 
 echo $dout 0.001 3dDiff >> $file_reg
-echo $CHANGEout 0 diff >> $file_reg
+echo $myoutput 0 diff >> $file_reg
 
-# ----------------------------------------------------------------------
-# exit, saving status
+# ======================================================================
+# KEEP: exit, saving status
 
 EXIT:
 echo $rv >! $file_stat
