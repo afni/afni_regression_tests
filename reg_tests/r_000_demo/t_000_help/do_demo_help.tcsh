@@ -16,7 +16,8 @@
 #
 # outputs:
 #   - status.txt  : contains 0 (success) or other (fail == 1 is sufficient)
-#   - regress.txt : contains list of "file test_type" for regression testing
+#   - regress.txt : contains lines of regression tests
+#                   3 columns: filename tolerance test
 #   - data        : any files needed for regression testing
 #
 # return:
@@ -47,7 +48,7 @@
 #          e.g. : 0, 0.01
 #     test      : one of diff, 3dDiff
 #        diff   : run diff or cmp to detect text differences
-#        3dDiff : run 3dDiff with any non-zero tolerance
+#        3dDiff : run 3dDiff (with tolerance, if non-zero)
 #
 # ----------------------------------------------------------------------
 # minor notes:
@@ -134,7 +135,7 @@ endif
 
 # some dataset test...
 set nvox = `3dinfo -nijk $dout`
-if ( $nvox != 1 ) then
+if ( "$nvox" != 1 ) then
    echo "== stat: FAIL: count $nvox != 1"
    set rv = 1
    goto EXIT
