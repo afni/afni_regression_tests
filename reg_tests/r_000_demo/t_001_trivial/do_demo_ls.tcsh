@@ -1,6 +1,11 @@
 #!/usr/bin/env tcsh
 
 # ----------------------------------------------------------------------
+# this is a trivial demo with CHANGE sections in place - a good template
+# ----------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------
 # set at least 4 required variables: dfull, file_stat, file_reg, rv
 
 # CHANGE: local data root (e.g. "" or "AFNI_data7/task_demo_ap/sub-000/")
@@ -33,12 +38,14 @@ endif
 #
 # if failure, goto EXIT
 
+# ----- START CHANGE: main process commands -----
 ls -l >! files.ls.txt
 set rv = $status
 
 if ( $rv ) then
    goto EXIT
 endif
+# ----- END CHANGE -----
 
 # ----------------------------------------------------------------------
 # basic tests from above process - run any basis tests (non-regression)
@@ -50,13 +57,13 @@ endif
 
 set rv = 0
 
-# ----- perform local test(s) : START CHANGE -----
+# ----- START CHANGE: perform local test(s) -----
 if ( ! -f files.ls.txt ) then
    echo "== stat: FAIL: missing output"
    set rv = 1
    goto EXIT
 endif
-# ----- end local test(s) : END CHANGE -----
+# ----- END CHANGE: local test(s) -----
 
 # ===============================================
 # KEEP: if we are here, the basic tests succeeded
