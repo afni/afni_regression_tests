@@ -9,6 +9,8 @@
 #       - likely with extra checks on any output files
 #     - create status.txt  : store the above status, also use for exit value
 #     - create regress.txt : store desired regression tests, to be run later
+#     - file can contain "# TTYPE test_type" lines, where test_type might
+#       be one of: demo, help, smoke, fast, slow
 #
 # ===========================================================================
 # inputs:
@@ -29,6 +31,8 @@
 #
 #   possibly edit the following CHANGE lines or regions:
 #
+#     0. include any desired TTYPE comment lines (spacing should be exact)
+#        - each type should be on a separate line, for grepping
 #     1. set $dlocal = top path to data (e.g. AFNI_data7/task_demo_ap/sub-000/)
 #        - this should end in a '/' (if not blank)
 #     2. write some "process" commands and store $status in $rv
@@ -68,6 +72,11 @@
 #     $rv         : final return value (used as "exit $rv")
 #
 # ----------------------------------------------------------------------
+
+# ----------------------------------------------------------------------
+# CHANGE: note types of tests this might apply to
+# TTYPE demo
+# TTYPE smoke
 
 # ----------------------------------------------------------------------
 # set at least 4 required variables: dfull, file_stat, file_reg, rv

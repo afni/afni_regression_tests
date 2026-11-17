@@ -1,6 +1,10 @@
 #!/usr/bin/env tcsh
 
 # ----------------------------------------------------------------------
+# note types of tests this might apply to
+# TTYPE demo
+
+# ----------------------------------------------------------------------
 # # set 4 required variables: dfull, rv, file_stat, file_reg
 
 set dlocal = "AFNI_data6/group_results/"

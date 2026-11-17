@@ -6,6 +6,10 @@
 
 
 # ----------------------------------------------------------------------
+# CHANGE: note types of tests this might apply to
+# TTYPE demo
+
+# ----------------------------------------------------------------------
 # set at least 4 required variables: dfull, file_stat, file_reg, rv
 
 # CHANGE: local data root (e.g. "" or "AFNI_data7/task_demo_ap/sub-000/")
